@@ -10,6 +10,7 @@ version = KotlinWrapperShikiConfig.VERSION
 
 kotlin {
     js {
+        useEsModules()
         browser {
             commonWebpackConfig {
                 outputFileName = group.toString().replace('.', '-') + ".js"
