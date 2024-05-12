@@ -1,11 +1,11 @@
 package dev.tonholo.kotlin.wrapper.shiki.core.types
 
+import dev.tonholo.kotlin.wrapper.shiki.core.themes.ThemeOptions
 import dev.tonholo.kotlin.wrapper.shiki.core.transformers.TransformerOptions
 import js.objects.jso
 
-external interface CodeToHastOptions : TransformerOptions {
+external interface CodeToHastOptions : ThemeOptions, TransformerOptions {
     var lang: String
-    var themes: ThemeInput
 
     /**
      * Merge whitespace tokens to saving extra `<span>`.
@@ -28,23 +28,12 @@ external interface CodeToHastOptions : TransformerOptions {
      */
     var structure: Structure /*'classic' | 'inline'*/
 
-    var defaultColor: String
 }
+
 
 fun CodeToHastOptions(
     builder: CodeToHastOptions.() -> Unit,
 ): CodeToHastOptions = jso(builder)
-
-external interface ThemeInput {
-    var light: String
-    var dark: String
-}
-
-@OptIn(ExperimentalJsExport::class)
-@JsExport.Ignore
-fun ThemeInput(
-    builder: ThemeInput.() -> Unit,
-): ThemeInput = js("({})").unsafeCast<ThemeInput>().apply(builder)
 
 value class Structure(val value: String) {
     companion object {
