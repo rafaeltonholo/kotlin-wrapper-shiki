@@ -36,6 +36,7 @@ import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.minus
 import org.jetbrains.compose.web.css.opacity
 import org.jetbrains.compose.web.css.overflow
+import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
@@ -74,6 +75,8 @@ object ShikiCodeBlockVars {
 object ShikiCodeBlockStylesheet : StyleSheet() {
     val container by style {
         position(Position.Relative)
+        overflowX("auto")
+        borderRadius(ShikiCodeBlockVars.shikiBorderRadius.value())
 
         "[class*='lang-'] pre.shiki" style {
             paddingTop(ShikiCodeBlockVars.shikiPaddingTop.value() + 0.8.cssRem)
@@ -81,7 +84,7 @@ object ShikiCodeBlockStylesheet : StyleSheet() {
             paddingBottom(ShikiCodeBlockVars.shikiPaddingBottom.value() + 0.8.cssRem)
             paddingLeft(ShikiCodeBlockVars.shikiPaddingStart.value())
             borderRadius(ShikiCodeBlockVars.shikiBorderRadius.value())
-            overflow("auto")
+            overflowX("auto")
             display(DisplayStyle.Flex)
         }
 
