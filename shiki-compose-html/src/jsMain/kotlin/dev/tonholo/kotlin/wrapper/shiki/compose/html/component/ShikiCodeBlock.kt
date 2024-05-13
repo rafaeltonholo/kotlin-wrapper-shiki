@@ -46,7 +46,6 @@ import org.jetbrains.compose.web.dom.AttrBuilderContext
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Style
 import org.w3c.dom.HTMLDivElement
-import org.w3c.dom.parsing.DOMParser
 
 object ShikiCodeBlockVars {
     val shikiPaddingStart by variable<CSSNumeric>()
@@ -149,14 +148,26 @@ fun ShikiCodeBlock(
         }
     }
     var parsedCode by remember { mutableStateOf("") }
+    val unescapedCode = remember(code) {
+        code.replace(oldValue = "&amp;", newValue = "&")
+            .replace(oldValue = "&lt;", newValue = "<")
+            .replace(oldValue = "&gt;", newValue = ">")
+            .replace(oldValue = "&quot;", newValue = "\"")
+            .replace(oldValue = "&apos;", newValue = "'")
+            .replace(oldValue = "&#39;", newValue = "'")
+            .replace(oldValue = "&#34;", newValue = "\"")
+            .replace(oldValue = "&#96;", newValue = "`")
+            .replace(oldValue = "&#123;", newValue = "{")
+            .replace(oldValue = "&#125;", newValue = "}")
+            .replace(oldValue = "&#91;", newValue = "[")
+            .replace(oldValue = "&#93;", newValue = "]")
+            .replace(oldValue = "&#40;", newValue = "(")
+            .replace(oldValue = "&#41;", newValue = ")")
+    }
 
     LaunchedEffect(themeOptions, transformers) {
         isReady = false
         Shiki.initialize()
-        val unescapedCode = DOMParser().parseFromString(code, "text/html")
-            .documentElement
-            ?.textContent
-            .orEmpty()
         parsedCode = Shiki.instance.codeToHtml(
             unescapedCode,
             options = CodeToHastOptions {
