@@ -15,36 +15,48 @@ import dev.tonholo.kotlin.wrapper.shiki.core.types.CodeToHastOptions
 import kotlinx.browser.document
 import org.jetbrains.compose.web.ExperimentalComposeWebApi
 import org.jetbrains.compose.web.css.CSSColorValue
+import org.jetbrains.compose.web.css.CSSLengthOrPercentageValue
 import org.jetbrains.compose.web.css.CSSLengthValue
 import org.jetbrains.compose.web.css.CSSNumeric
 import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.FlexDirection
+import org.jetbrains.compose.web.css.Position
 import org.jetbrains.compose.web.css.StylePropertyString
 import org.jetbrains.compose.web.css.StyleSheet
 import org.jetbrains.compose.web.css.backgroundColor
 import org.jetbrains.compose.web.css.borderRadius
+import org.jetbrains.compose.web.css.cssRem
 import org.jetbrains.compose.web.css.display
-import org.jetbrains.compose.web.css.em
 import org.jetbrains.compose.web.css.filter
+import org.jetbrains.compose.web.css.flexDirection
+import org.jetbrains.compose.web.css.flexGrow
 import org.jetbrains.compose.web.css.fontSize
+import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginLeft
+import org.jetbrains.compose.web.css.minus
 import org.jetbrains.compose.web.css.opacity
+import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.css.paddingLeft
 import org.jetbrains.compose.web.css.paddingRight
 import org.jetbrains.compose.web.css.paddingTop
 import org.jetbrains.compose.web.css.percent
 import org.jetbrains.compose.web.css.plus
+import org.jetbrains.compose.web.css.position
 import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.right
 import org.jetbrains.compose.web.css.s
-import org.jetbrains.compose.web.css.textAlign
 import org.jetbrains.compose.web.css.times
+import org.jetbrains.compose.web.css.top
 import org.jetbrains.compose.web.css.transitions
 import org.jetbrains.compose.web.css.value
 import org.jetbrains.compose.web.css.variable
 import org.jetbrains.compose.web.css.width
 import org.jetbrains.compose.web.dom.AttrBuilderContext
 import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Style
+import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLDivElement
 
 object ShikiCodeBlockVars {
@@ -60,7 +72,29 @@ object ShikiCodeBlockVars {
 
 @OptIn(ExperimentalComposeWebApi::class)
 object ShikiCodeBlockStylesheet : StyleSheet() {
-    init {
+    val container by style {
+        position(Position.Relative)
+
+        "[class*='lang-'] pre.shiki" style {
+            paddingTop(ShikiCodeBlockVars.shikiPaddingTop.value() + 0.8.cssRem)
+            paddingRight(ShikiCodeBlockVars.shikiPaddingEnd.value())
+            paddingBottom(ShikiCodeBlockVars.shikiPaddingBottom.value() + 0.8.cssRem)
+            paddingLeft(ShikiCodeBlockVars.shikiPaddingStart.value())
+            borderRadius(ShikiCodeBlockVars.shikiBorderRadius.value())
+            overflow("auto")
+            display(DisplayStyle.Flex)
+        }
+
+        "[class*='lang-'] pre.shiki code" style {
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Column)
+            flexGrow(1)
+        }
+
+        "[class*='lang-'] pre.shiki code .line:empty" {
+            height(1.5.cssRem)
+        }
+
         "[class*='lang-'] pre.shiki.has-focused code .line:not(.focused)" style {
             opacity(0.7f)
             filter {
@@ -82,7 +116,7 @@ object ShikiCodeBlockStylesheet : StyleSheet() {
             }
         }
         "[class*='lang-'] pre.shiki code .highlighted" style {
-            display(DisplayStyle.InlineBlock)
+            flexGrow(1)
             width(
                 100.percent +
                     ShikiCodeBlockVars.shikiPaddingStart.value() +
@@ -101,24 +135,13 @@ object ShikiCodeBlockStylesheet : StyleSheet() {
                 ShikiCodeBlockVars.shikiPaddingStart.value() * -1
             )
         }
-
-        "[class*='lang-'] pre.shiki" style {
-            paddingTop(ShikiCodeBlockVars.shikiPaddingTop.value())
-            paddingRight(ShikiCodeBlockVars.shikiPaddingEnd.value())
-            paddingBottom(ShikiCodeBlockVars.shikiPaddingBottom.value() + 0.8.em)
-            paddingLeft(ShikiCodeBlockVars.shikiPaddingStart.value())
-            borderRadius(ShikiCodeBlockVars.shikiBorderRadius.value())
-        }
-
-        "[class*='lang-'] pre.shiki:before" style {
-            property("content", ShikiCodeBlockVars.shikiLanguage.value())
-            display(DisplayStyle.Block)
-            width(100.percent)
-            textAlign("end")
-            opacity(0.5f)
-            fontSize(ShikiCodeBlockVars.shikiLanguageLabelFontSize.value(0.8.em))
-            paddingBottom(0.1.em)
-        }
+    }
+    val language by style {
+        position(Position.Absolute)
+        top((ShikiCodeBlockVars.shikiPaddingTop.value() - 0.65.cssRem).unsafeCast<CSSLengthOrPercentageValue>())
+        right(value = ShikiCodeBlockVars.shikiPaddingEnd.value().unsafeCast<CSSLengthOrPercentageValue>())
+        fontSize(ShikiCodeBlockVars.shikiLanguageLabelFontSize.value(0.8.cssRem))
+        opacity(0.5f)
     }
 }
 
@@ -192,7 +215,7 @@ fun ShikiCodeBlock(
     Div(
         attrs = {
             attrs?.invoke(this)
-            classes("lang-$language")
+            classes(ShikiCodeBlockStylesheet.container)
             style {
                 property("--${ShikiCodeBlockVars.shikiLanguage.name}", "\"$language\"")
                 paddingStart?.let {
@@ -214,11 +237,25 @@ fun ShikiCodeBlock(
                     property("--${ShikiCodeBlockVars.shikiBorderRadius.name}", it)
                 }
             }
-        }
+        },
     ) {
-        DisposableEffect(parsedCode) {
-            scopeElement.innerHTML = parsedCode
-            onDispose { }
+        Span(
+            attrs = {
+                classes(ShikiCodeBlockStylesheet.language)
+            },
+        ) {
+            Text(language)
+        }
+
+        Div(
+            attrs = {
+                classes("lang-$language")
+            },
+        ) {
+            DisposableEffect(parsedCode) {
+                scopeElement.innerHTML = parsedCode
+                onDispose { }
+            }
         }
     }
 }
