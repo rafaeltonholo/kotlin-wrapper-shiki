@@ -3,6 +3,7 @@ package dev.tonholo.kotlin.wrapper.shiki.compose.html.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,7 +36,6 @@ import org.jetbrains.compose.web.css.height
 import org.jetbrains.compose.web.css.marginLeft
 import org.jetbrains.compose.web.css.minus
 import org.jetbrains.compose.web.css.opacity
-import org.jetbrains.compose.web.css.overflow
 import org.jetbrains.compose.web.css.overflowX
 import org.jetbrains.compose.web.css.paddingBottom
 import org.jetbrains.compose.web.css.paddingLeft
@@ -59,6 +59,7 @@ import org.jetbrains.compose.web.dom.Span
 import org.jetbrains.compose.web.dom.Style
 import org.jetbrains.compose.web.dom.Text
 import org.w3c.dom.HTMLDivElement
+import org.w3c.dom.asList
 
 object ShikiCodeBlockVars {
     val shikiPaddingStart by variable<CSSNumeric>()
@@ -213,6 +214,18 @@ fun ShikiCodeBlock(
             },
             ShikiCodeBlockStylesheet.cssRules,
         )
+    }
+    SideEffect {
+        println("side effect")
+        val styles = document.querySelectorAll(
+            "style[id='$SHIKI_STYLE_ID-${themeOptions.defaultColor}']",
+        )
+        val multiplesStyle = styles.length > 1
+        if (multiplesStyle) {
+            styles.asList().drop(1).forEach {
+                it.parentNode?.removeChild(it)
+            }
+        }
     }
 
     Div(
