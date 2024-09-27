@@ -1,6 +1,7 @@
 plugins {
     id("dev.tonholo.kotlin.wrapper.shiki.library")
     alias(libs.plugins.jetbrains.compose)
+    alias(libs.plugins.org.jetbrains.kotlin.plugin.compose)
 }
 
 kotlin {
