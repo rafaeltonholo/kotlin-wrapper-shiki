@@ -1,6 +1,10 @@
 package dev.tonholo.kotlin.wrapper.shiki.gradle
 
-public object KotlinWrapperShikiConfig {
-    public const val GROUP: String = "dev.tonholo.kotlin.wrapper.shiki"
-    public const val VERSION: String = "1.0.0-${ShikiConfig.VERSION}"
+import org.gradle.api.Project
+
+private const val GROUP: String = "dev.tonholo.kotlin.wrapper.shiki"
+
+internal fun Project.applyGroupAndVersion() {
+    group = GROUP
+    version = "1.0.0-${libs.versions.shiki.get()}"
 }

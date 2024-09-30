@@ -1,6 +1,7 @@
 package dev.tonholo.kotlin.wrapper.shiki.core
 
 import dev.tonholo.kotlin.wrapper.shiki.core.types.CodeToHastOptions
+import dev.tonholo.kotlin.wrapper.shiki.shiki_core.BuildConfig
 import kotlinx.browser.document
 import kotlinx.coroutines.await
 import org.w3c.dom.HTMLScriptElement
@@ -51,7 +52,7 @@ class Shiki internal constructor(api: ShikiApi) : ShikiApi by api {
                     type = "module"
                     // TODO: use version from config.
                     textContent = """
-                    |import * as shiki from 'https://esm.run/shiki@1.5.1'
+                    |import * as shiki from 'https://esm.run/shiki@${BuildConfig.SHIKI_VERSION}'
                     |
                     |KotlinWrapperShiki.invoke(shiki)
                 """.trimMargin()
